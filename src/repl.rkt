@@ -24,11 +24,14 @@
 
 
 ;; the repl
+;;
+;; TODO: multi-line support: if we're inside of {parens,brackets,braces}, wait
+;; for more lines. can do this by checking the token stream.
 (define (repl)
   (let/ec quit
     (with-defn-parser
       (let loop ()
-        (display "- DF> ")
+        (display "datafun> ")
         ;; PROBLEM: can't deal with source info properly since a single defn can
         ;; be formed from multiple different lines collated together! :(
         (define line (read-line))

@@ -65,6 +65,11 @@
    (error parse-error)
    (end eof)
 
+   (precs
+    (left ∨ LUB)
+    (nonassoc IN? = <=)
+    (left + -))
+
    (grammar
     (decls-or-expr
      ((decls) `(decls ,$1))
@@ -205,16 +210,16 @@
      ((FOR LP loops RP expr)        (e-loop $3 $5))
      ((e-op : type)                 (e-ann $3 $1))
      ((e-op)                        $1))
-    (e-op ((e-op-) (annotate! $1)))
+    (e-op ((e-op-) (annotate! $1))
+          ((e-app) $1))
     (e-op-
-     ;; for now, everything is left associative. TODO: precedence parsing.
-     ((e-op e-oper e-app)    (e-app (e-app $2 $1) $3))
-     ((e-op ∨ e-app)         (e-lub (list $1 $3)))
-     ((e-op LUB e-app)       (e-lub (list $1 $3)))
-     ((e-op IN? e-app)       (e-in? $1 $3))
+     ;; the precedence parsing here is an awful hack.
+     ((e-op e-oper e-op)     (prec +) (e-app (e-app $2 $1) $3))
+     ((e-op ∨ e-op)          (e-lub (list $1 $3)))
+     ((e-op LUB e-op)        (e-lub (list $1 $3)))
+     ((e-op IN? e-op)        (e-in? $1 $3))
      ((Id LP e-list RP)      (e-tag $1 $3))
-     ((Id)                   (e-tag $1 '()))
-     ((e-app)                $1))
+     ((Id)                   (e-tag $1 '())))
     (e-oper
      ((oper) (annotate! (if (prim? $1) (e-prim $1) (e-var $1)))))
     (e-app

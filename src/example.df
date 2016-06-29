@@ -120,7 +120,8 @@ fun get_salary x = x.salary
 val salary_total: nat
 val salary_total = aggregate get_salary 0 (+) salaries
 (* maybe syntax like:
- * for (x in salaries) aggregate (0, accum => accum + x.salary) *)
+ * for (x in salaries) aggregate (0, accum => accum + x.salary)
+ * for (x in salaries) aggregate (x.salary, 0, (+)) *)
 
 (* val salary_total_per_department: {str, nat}
  * val salary_total_per_department = ??? *)
@@ -156,6 +157,26 @@ val advisor = { ("constable", "harper"), ("harper", "arbob")
 val ancestor : {str, str}
 (* fix ancestor = advisor ∨ {(a,c) | (a,b) ∈ advisor, (.b,c) ∈ ancestor} *)
 fix ancestor = advisor ∨ (ancestor • ancestor)
+
+(* more geneology - the sons of Fëanor *)
+val parent = {("Fëanor", "Maedhros"), ("Fëanor", "Celegorm"),
+              ("Fëanor", "Caranthir"), ("Fëanor", "Amrod"),
+              ("Fëanor", "Maglor"), ("Fëanor", "Curufin"), ("Fëanor", "Amras")}
+
+(* This will give us all unordered pairs of siblings. *)
+val siblings = {{x,y} | (p,x) in parent, (.p,y) in parent, not (x = y)}
+
+(* This gives us all sets of siblings.
+ * This will do redundant work if we record both parents for each person. *)
+val siblingsets = {{c | (.p, c) in parent} | (p,_) in parent}
+
+(* Maps parents to sets of their children. *)
+val children: {str: {str}}
+val children = for ((p,c) in parent) {p: {c}}
+
+(* We can't parse this expression yet. *)
+val siblingsets2 = {v | (k,v) in entries children}
+(* val siblingsets2 = {v | k:v in children} *)
 
 
 (* relation composition. can also use primitive operator (•) / `compose'. *)
